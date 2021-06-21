@@ -1,0 +1,1 @@
+stickytape --add-python-path src main.py > code.py
