@@ -33,7 +33,6 @@ class Attack:
 
     def check_hit(self, Id: int):
         if self.field_analyser.prev_state:
-            ship = self.field_analyser.state.MyShips[Id]
             prev_ship = self.field_analyser.prev_state.MyShips[Id]
 
             if self.field_analyser.state.OppShips.get(prev_ship.OppIdTarget, None):
@@ -43,8 +42,8 @@ class Attack:
                 for corr in SHIP_CORR:
                     if point_in_bresenham(point=opp_pos + corr, start=prev_pos, finish=prev_target):
                         return
-                edit = sorted(list(ship.Adjustment.items()), key=lambda x: x[1])[-1][0]
-                ship.Adjustment[edit] -= self.delta_adjustment
+                edit = sorted(list(self.field_analyser.state.MyShips[Id].Adjustment.items()), key=lambda x: x[1])[-1][0]
+                self.field_analyser.state.MyShips[Id].Adjustment[edit] -= self.delta_adjustment
 
     def update(self):
         g_id = self.field_analyser.state.GlobalTarget
@@ -74,7 +73,7 @@ class Attack:
                     ship.AttackTarget = opp.Data.Position  # + cor
                     ship.UsedGun = ship.Data.Guns[0].Name
                     ship.OppIdTarget = opp.Data.Id
-                    self.check_friendly_fire(ship)
+                    # self.check_friendly_fire(ship)
                 else:
                     data = sorted(list(self.field_analyser.state.DistanceHp[Id].items()), key=lambda x: x[1][1])
                     for el in data:
@@ -86,7 +85,7 @@ class Attack:
                             ship.AttackTarget = opp.Data.Position  # + cor
                             ship.UsedGun = ship.Data.Guns[0].Name
                             ship.OppIdTarget = opp.Data.Id
-                            self.check_friendly_fire(ship)
+                            # self.check_friendly_fire(ship)
             else:
                 ship.AttackTarget = None
                 ship.UsedGun = None
