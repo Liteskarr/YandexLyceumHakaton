@@ -42,20 +42,20 @@ class BaseMovingTactics(IMovingTactics):
         own_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                     for ship in self.field_analyser.state.MyShips.values()))
         own_average_distance /= len(self.field_analyser.state.MyShips) * 29
-        own_distance_score = 1.0 - own_average_distance
+        own_distance_score = (1.0 - own_average_distance)**(0.5)
         # Подсчет количества HP.
         hp_score = min(1.0, self.field_analyser.state.OppShips[ship_id].Data.Health / 128)
         # Дальность от своих союзников.
         enemy_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                       for ship in self.field_analyser.state.OppShips.values()))
         enemy_average_distance /= len(self.field_analyser.state.MyShips) * 29
-        enemy_distance_score = 1.0 - own_average_distance
+        enemy_distance_score = 1.0 - enemy_average_distance
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, enemy_position)
-        center_score = 1.0 - (center_distance / 30) ** (1 / 3)
+        center_score = 1.0 - (center_distance / 30) ** (1 / 4)
         center_score *= -4
         #
-        target_changing_score = 0 if self.global_target in [ship_id, None] else -2
+        target_changing_score = 0 if self.global_target in [ship_id, None] else -1.65
         return own_distance_score + hp_score + enemy_distance_score + center_score + target_changing_score
 
     def point_score(self, point: Vector, dist: Vector, ship_id: int) -> float:
