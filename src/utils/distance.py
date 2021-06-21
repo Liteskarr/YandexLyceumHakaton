@@ -1,6 +1,8 @@
+from itertools import takewhile
 from typing import Tuple, List
 
 from ship import Ship
+from utils.bresenham import server_bresenham
 from utils.geometry import SHIP_CORR
 from utils.vector import Vector
 
@@ -35,6 +37,10 @@ def get_ships_2point(point_1: Vector, point_2: Vector, my_ships: List[Ship], opp
                 opp += 1
                 break
     return my, opp
+
+
+def get_direction_vector(point: Vector, target: Vector) -> Vector:
+    return list(takewhile(lambda x: (x - point).c_len() <= 1, server_bresenham(point, target)))[-1] - point
 
 
 if __name__ == '__main__':

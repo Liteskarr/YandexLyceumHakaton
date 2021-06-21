@@ -46,7 +46,7 @@ class FieldAnalyser:
         for my_ship in self.state.MyShips.values():
             for opp_ship in self.state.OppShips.values():
                 # Дистанция и хп
-                distance = distance_ship2ship(my_ship.ExpectedPosition, opp_ship.ExpectedPosition)
+                distance = distance_ship2ship(my_ship.ExpectedPosition, opp_ship.Data.Position)
                 self.state.OppDistanceHp[my_ship.Data.Id][opp_ship.Data.Id] = [distance, opp_ship.Data.Health]
                 # Предполагаемый урон
                 if my_ship.Data.Guns and distance <= my_ship.Data.Guns[0].Radius:

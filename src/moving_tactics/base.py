@@ -4,12 +4,11 @@ from itertools import product
 from typing import Dict, Optional, List
 
 from field_analyser import FieldAnalyser
-from moving import change_velocity, moving
+from moving import change_velocity
 from moving_tactics import IMovingTactics
 from ship import Ship
 from utils.distance import distance_point2ship, distance_ship2ship
 from utils.vector import Vector
-
 
 MovingState = namedtuple('MovingState', ['lock'])
 
@@ -17,6 +16,7 @@ MovingState = namedtuple('MovingState', ['lock'])
 class MovingStates(Enum):
     FREE = MovingState(False)
     BRAKING = MovingState(True)
+    RETREAT = MovingState(True)
 
 
 def could_stand_on_point(p: Vector):
@@ -52,9 +52,11 @@ class BaseMovingTactics(IMovingTactics):
         enemy_distance_score = 1.0 - own_average_distance
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, enemy_position)
-        center_score = 1.0 - center_distance / 30
-        center_score *= -3
-        return own_distance_score + hp_score + enemy_distance_score + center_score
+        center_score = 1.0 - (center_distance / 30) ** (1 / 3)
+        center_score *= -4
+        #
+        target_changing_score = 0 if self.global_target in [ship_id, None] else -2
+        return own_distance_score + hp_score + enemy_distance_score + center_score + target_changing_score
 
     def point_score(self, point: Vector, dist: Vector, ship_id: int) -> float:
         distance = distance_point2ship(point, self.field_analyser.state.MyShips[ship_id].Data.Position)
@@ -73,9 +75,14 @@ class BaseMovingTactics(IMovingTactics):
         space_score **= 3
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, point)
-        center_score = 1.0 - center_distance / 30
-        center_score *= -3
+        center_score = 1.0 - (center_distance / 30) ** (1 / 3)
+        center_score *= -4
         return center_score + distance_score + space_score
+
+    def must_retreat(self, ship: Ship) -> bool:
+        if self.field_analyser.prev_state.MyShips[ship.Data.Id].Data.Health / ship.Data.Health < 0.8:
+            return True
+        return False
 
     def ship_initialization(self):
         for ship in self.field_analyser.state.MyShips.values():
