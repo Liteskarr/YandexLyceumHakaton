@@ -1,5 +1,6 @@
-from typing import Tuple
+from typing import Tuple, List
 
+from ship import Ship
 from utils.geometry import SHIP_CORR
 from utils.vector import Vector
 
@@ -18,6 +19,22 @@ def get_fire_offset(my_pos: Vector, ship_pos: Vector) -> Tuple[Vector, Vector]:
             (abs((my_pos + my_c) - (ship_pos + opp_c)).m_len(), (my_c, opp_c))
             for my_c in SHIP_CORR for opp_c in SHIP_CORR
         ], key=lambda x: x[0])[0][1]
+
+
+def get_ships_2point(point_1: Vector, point_2: Vector, my_ships: List[Ship], opp_ships: List[Ship]) -> tuple:
+    point_1, point_2 = min(point_1, point_2), max(point_1, point_2)
+    my, opp = 0, 0
+    for ship in my_ships:
+        for cor in SHIP_CORR:
+            if point_1 <= ship.Data.Position + cor <= point_2:
+                my += 1
+                break
+    for ship in opp_ships:
+        for cor in SHIP_CORR:
+            if point_1 <= ship.Data.Position + cor <= point_2:
+                opp += 1
+                break
+    return my, opp
 
 
 if __name__ == '__main__':

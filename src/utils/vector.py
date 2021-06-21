@@ -41,6 +41,18 @@ class Vector(JSONCapability):
     def __ne__(self, other: "Vector"):
         return not (self == other)
 
+    def __lt__(self, other: "Vector"):
+        return self.X < other.X and self.Y < other.Y and self.Z < other.Z
+
+    def __le__(self, other: "Vector"):
+        return self.X <= other.X and self.Y <= other.Y and self.Z <= other.Z
+
+    def __gt__(self, other: "Vector"):
+        return self.X > other.X and self.Y > other.Y and self.Z > other.Z
+
+    def __ge__(self, other: "Vector"):
+        return self.X >= other.X and self.Y >= other.Y and self.Z >= other.Z
+
     def __abs__(self):
         return Vector(abs(self.X), abs(self.Y), abs(self.Z))
 
