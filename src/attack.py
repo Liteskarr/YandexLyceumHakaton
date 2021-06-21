@@ -37,7 +37,7 @@ class Attack:
 
             if self.field_analyser.state.OppShips.get(prev_ship.OppIdTarget, None):
                 prev_target = self.field_analyser.prev_state.MyShips[Id].AttackTarget
-                prev_pos = prev_ship.Data.Position + prev_ship.Data.Velocity
+                prev_pos = prev_ship.Data.Position
                 opp_pos = self.field_analyser.state.OppShips[prev_ship.OppIdTarget].Data.Position
                 for corr in SHIP_CORR:
                     if point_in_bresenham(point=opp_pos + corr, start=prev_pos, finish=prev_target):
@@ -64,10 +64,10 @@ class Attack:
                 if hp > 0 and dist <= ship.Data.Guns[0].Radius:
                     self.damage_opp(gun=ship.Data.Guns[0], opp_Id=opp.Data.Id)
                     # DAMAGE
-                    ship.AttackTarget = opp.Data.Position  # + cor
+                    ship.AttackTarget = opp.Data.Position + opp.Data.Velocity  # + cor
                     ship.UsedGun = ship.Data.Guns[0].Name
                     ship.OppIdTarget = opp.Data.Id
-                    self.check_friendly_fire(ship)
+                    # self.check_friendly_fire(ship)
                 else:
                     data = sorted(list(self.field_analyser.state.DistanceHp[Id].items()), key=lambda x: x[1][1])
                     for el in data:
@@ -76,10 +76,10 @@ class Attack:
                             self.damage_opp(gun=ship.Data.Guns[0], opp_Id=el[0])
                             opp = self.field_analyser.state.OppShips[el[0]]
                             # DAMAGE
-                            ship.AttackTarget = opp.Data.Position  # + cor
+                            ship.AttackTarget = opp.Data.Position + opp.Data.Velocity  # + cor
                             ship.UsedGun = ship.Data.Guns[0].Name
                             ship.OppIdTarget = opp.Data.Id
-                            self.check_friendly_fire(ship)
+                            # self.check_friendly_fire(ship)
             else:
                 ship.AttackTarget = None
                 ship.UsedGun = None

@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import List, Optional, Iterator
+from typing import List, Optional, Iterator, Dict
 
 from blocks import EquipmentBlock, EngineBlock, GunBlock
 from json_capability import JSONCapability
@@ -46,10 +46,10 @@ class Ship(JSONCapability):
     OppIdTarget: Optional[int] = None
     UsedGun: Optional[str] = None
     FriendlyFire: bool = False
-    Adjustment = {
+    Adjustment: Dict[Vector, int] = field(default_factory=lambda: {
         Vector(0, 0, 0): 5, Vector(1, 0, 0): 1, Vector(0, 0, 1): 1, Vector(1, 0, 1): 4,
         Vector(0, 1, 0): 3, Vector(1, 1, 0): 1, Vector(0, 1, 1): 1, Vector(1, 1, 1): 3
-    }
+    })
 
     # Moving
     Way: Optional[Iterator[Vector]] = None

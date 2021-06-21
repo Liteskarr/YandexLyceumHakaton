@@ -46,7 +46,7 @@ class FieldAnalyser:
         for my_ship in my:
             for opp_ship in opponents:
                 # Дистанция и хп
-                distance = distance_c_len(my_ship.Position + my_ship.Velocity, opp_ship.Position) - 1
+                distance = distance_c_len(my_ship.Position + my_ship.Velocity, opp_ship.Position + opp_ship.Velocity)
                 self.state.DistanceHp[my_ship.Id][opp_ship.Id] = [distance, opp_ship.Health]
                 # Предполагаемый урон
                 if my_ship.Guns and distance <= my_ship.Guns[0].Radius:
