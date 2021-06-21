@@ -1,9 +1,14 @@
 from utils.vector import Vector
 from utils.bresenham import server_bresenham, bresenham
 
-
 SHIP_CORR = [Vector(0, 0, 0), Vector(1, 0, 0), Vector(0, 0, 1), Vector(1, 0, 1),
              Vector(0, 1, 0), Vector(1, 1, 0), Vector(0, 1, 1), Vector(1, 1, 1)]
+NEG_SHIP_CORR = {
+    Vector(0, 0, 0): Vector(1, 1, 1), Vector(1, 0, 0): Vector(0, 1, 1),
+    Vector(0, 0, 1): Vector(1, 1, 0), Vector(1, 0, 1): Vector(0, 1, 0),
+    Vector(0, 1, 0): Vector(1, 0, 1), Vector(1, 1, 0): Vector(0, 0, 1),
+    Vector(0, 1, 1): Vector(1, 0, 0), Vector(1, 1, 1): Vector(0, 0, 0)
+}
 
 
 def point_in_bresenham(point: Vector, start: Vector, finish: Vector) -> bool:

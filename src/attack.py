@@ -2,7 +2,7 @@ from blocks import GunBlock
 from field_analyser import FieldAnalyser
 from ship import Ship
 from utils.distance import get_fire_offset, distance_ship2ship, get_direction_vector
-from utils.geometry import point_in_bresenham, SHIP_CORR
+from utils.geometry import point_in_bresenham, SHIP_CORR, NEG_SHIP_CORR
 
 
 class Attack:
@@ -27,10 +27,12 @@ class Attack:
             target = self.field_analyser.state.OppShips[focus[0][0]]
         for ship_id, ship in self.field_analyser.state.MyShips.items():
             if focus and distance_ship2ship(ship.ExpectedPosition, target.Data.Position):
-                correction = get_direction_vector(ship.ExpectedPosition, target.Data.Position)
+                _, offset = get_fire_offset(ship.ExpectedPosition, target.Data.Position)
+                correction = NEG_SHIP_CORR[offset]
                 ship.set_attack(target.Data.Position + correction, self.get_best_gun(ship), target.Data.Id)
             else:
                 enemy = self.field_analyser.state.OppShips[self.get_best_enemy(ship)]
                 if distance_ship2ship(enemy.Data.Position, ship.ExpectedPosition) <= ship.Data.MaxRangeAttack:
-                    correction = get_direction_vector(ship.ExpectedPosition, target.Data.Position)
+                    _, offset = get_fire_offset(ship.ExpectedPosition, target.Data.Position)
+                    correction = NEG_SHIP_CORR[offset]
                     ship.set_attack(enemy.Data.Position + correction, self.get_best_gun(ship), enemy.Data.Id)
