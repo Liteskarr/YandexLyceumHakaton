@@ -1,10 +1,10 @@
 from collections import namedtuple
 from enum import Enum
-from itertools import product
+from itertools import product, chain
 from typing import Dict, Optional, List
 
 from field_analyser import FieldAnalyser
-from moving import change_velocity
+from moving import change_velocity, moving
 from moving_tactics import IMovingTactics
 from ship import Ship
 from utils.distance import distance_point2ship, distance_ship2ship
@@ -55,29 +55,23 @@ class BaseMovingTactics(IMovingTactics):
         center_score = 1.0 - (center_distance / 30) ** (1 / 3)
         center_score *= -4
         #
-        target_changing_score = 0 if self.global_target in [ship_id, None] else -2
+        target_changing_score = 0 if self.global_target in [ship_id, None] else -2.0 * (1.0 - own_average_distance)
         return own_distance_score + hp_score + enemy_distance_score + center_score + target_changing_score
 
-    def point_score(self, point: Vector, dist: Vector, ship_id: int) -> float:
+    def point_score(self, point: Vector, dist: Vector, ship_id: int):
         distance = distance_point2ship(point, self.field_analyser.state.MyShips[ship_id].Data.Position)
         distance_score = 1.0 - distance / 30
-        #
-        x_space = 0
-        if dist.X:
-            x_space = point.X + 1 if dist.X > 0 else 30 - point.X
-        y_space = 0
-        if dist.Y:
-            y_space = point.Y + 1 if dist.Y > 0 else 30 - point.Y
-        z_space = 0
-        if dist.Z:
-            z_space = point.Z + 1 if dist.Z > 0 else 30 - point.Z
-        space_score = x_space * y_space * z_space / 27000
-        space_score **= 3
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, point)
         center_score = 1.0 - (center_distance / 30) ** (1 / 3)
         center_score *= -4
-        return center_score + distance_score + space_score
+        #
+        count = 0
+        for enemy in self.field_analyser.state.OppShips.values():
+            if distance_point2ship(point, enemy.Data.Position) <= 5:
+                count += 1
+        count_score = (1.0 - count / 5) ** (1 / 2)
+        return count_score + center_score + distance_score
 
     def must_retreat(self, ship: Ship) -> bool:
         if self.field_analyser.prev_state.MyShips[ship.Data.Id].Data.Health / ship.Data.Health < 0.8:
@@ -103,7 +97,10 @@ class BaseMovingTactics(IMovingTactics):
                                  key=lambda x: self.enemy_score(x.Data.Id)).Data.Id
 
     def move(self, ship: Ship, target: Vector):
-        ship.set_move_target(target)
+        if ship.Data.Velocity == Vector(0, 0, 0) and Vector.between(Vector(7, 7, 7), Vector(21, 21, 21), target):
+            ship.set_way(moving(ship.Data.Position, target, ship.Data.MaxAccelerate))
+        else:
+            ship.set_move_target(target)
 
     def update(self):
         if not self.initialized:
@@ -121,7 +118,6 @@ class BaseMovingTactics(IMovingTactics):
                 points = filter(lambda x: could_stand_on_point(x[0]), points)
                 points = filter(lambda x: x[0] not in self.targets.values(), points)
                 points = list(points)
-                point = max(points,
-                            key=lambda x: self.point_score(x[0], x[1], ship_id))
+                point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id))
                 self.targets[ship_id] = point[0]
                 self.move(ship, point[0])

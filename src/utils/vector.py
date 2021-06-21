@@ -78,3 +78,9 @@ class Vector(JSONCapability):
 
     def to_json(self):
         return self.__str__()
+
+    @classmethod
+    def between(cls, v1: "Vector", v2: "Vector", p: "Vector"):
+        return min(v1.X, v2.X) <= p.X <= max(v1.X, v2.X) and \
+               min(v1.Y, v2.Y) <= p.Y <= max(v1.Y, v2.Y) and \
+               min(v1.Z, v2.Z) <= p.Z <= max(v1.Z, v2.Z)
