@@ -22,7 +22,7 @@ def make_turn(data: dict, controller: Controller) -> BattleOutput:
     battle_output.Message = f"No output!"
     try:
         battle_output.UserCommands = list(controller.update(battle_state.My, battle_state.Opponent))
-        battle_output.Message += f'{controller.field_analyser.state.DistanceHp}\n'
+        # battle_output.Message += f'{controller.field_analyser.state.DistanceHp}\n'
     except Exception as e:
         battle_output.Message = '\n'.join(traceback.format_tb(e.__traceback__))
         battle_output.Message += f'\n{e}'

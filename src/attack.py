@@ -52,11 +52,12 @@ class Attack:
             if opp.Data.Health <= self.field_analyser.state.OppIsDamage[Id]:
                 self.focus.append(Id)
         if not self.focus:
-            self.focus = sorted(list(self.field_analyser.state.OppIsDamage.items()), key=lambda x: x[1])[0]
+            self.focus = sorted(list(self.field_analyser.state.OppIsDamage.items()), key=lambda x: x[1])[-1]
         #
         for Id, ship in self.field_analyser.state.MyShips.items():
-            self.check_hit(Id)
-            # TODO: Проверить на попадание
+            ship.AttackTarget = None
+            ship.UsedGun = None
+            ship.OppIdTarget = None
             if self.focus:
                 opp = self.field_analyser.state.OppShips[self.focus[0]]
                 dist, hp = self.field_analyser.state.DistanceHp[Id][opp.Data.Id]
@@ -80,7 +81,3 @@ class Attack:
                             ship.UsedGun = ship.Data.Guns[0].Name
                             ship.OppIdTarget = opp.Data.Id
                             # self.check_friendly_fire(ship)
-            else:
-                ship.AttackTarget = None
-                ship.UsedGun = None
-                ship.OppIdTarget = None
