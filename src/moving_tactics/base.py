@@ -7,7 +7,7 @@ from field_analyser import FieldAnalyser
 from moving import change_velocity, moving
 from moving_tactics import IMovingTactics
 from ship import Ship
-from utils.distance import distance_opp_c_len, distance_c_len
+from utils.distance import distance_point2ship, distance_ship2ship
 from utils.vector import Vector
 
 
@@ -39,24 +39,27 @@ class BaseMovingTactics(IMovingTactics):
     def enemy_score(self, ship_id: int) -> float:
         enemy_position = self.field_analyser.state.OppShips[ship_id].Data.Position
         # Подсчет дальности от наших кораблей.
-        own_average_distance = sum((distance_c_len(ship.Data.Position, enemy_position)
+        own_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                     for ship in self.field_analyser.state.MyShips.values()))
         own_average_distance /= len(self.field_analyser.state.MyShips) * 29
         own_distance_score = 1.0 - own_average_distance
         # Подсчет количества HP.
         hp_score = min(1.0, self.field_analyser.state.OppShips[ship_id].Data.Health / 128)
         # Дальность от своих союзников.
-        enemy_average_distance = sum((distance_c_len(ship.Data.Position, enemy_position)
+        enemy_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                       for ship in self.field_analyser.state.OppShips.values()))
         enemy_average_distance /= len(self.field_analyser.state.MyShips) * 29
         enemy_distance_score = 1.0 - own_average_distance
         # Близость к центру масс противников.
-        center_distance = distance_opp_c_len(self.enemies_center, enemy_position)
-        center_score = center_distance / 30
-        return (own_distance_score + hp_score + enemy_distance_score + center_score) / 4
+        center_distance = distance_point2ship(self.enemies_center, enemy_position)
+        center_score = 1.0 - center_distance / 30
+        center_score *= -3
+        return own_distance_score + hp_score + enemy_distance_score + center_score
 
     def point_score(self, point: Vector, dist: Vector, ship_id: int) -> float:
-        # Свободное количество блоков для отступления.
+        distance = distance_point2ship(point, self.field_analyser.state.MyShips[ship_id].Data.Position)
+        distance_score = 1.0 - distance / 30
+        #
         x_space = 0
         if dist.X:
             x_space = point.X + 1 if dist.X > 0 else 30 - point.X
@@ -67,10 +70,12 @@ class BaseMovingTactics(IMovingTactics):
         if dist.Z:
             z_space = point.Z + 1 if dist.Z > 0 else 30 - point.Z
         space_score = x_space * y_space * z_space / 27000
+        space_score **= 3
         # Близость к центру масс противников.
-        center_distance = distance_opp_c_len(self.enemies_center, point)
-        center_score = center_distance / 30
-        return (space_score + center_score) / 2
+        center_distance = distance_point2ship(self.enemies_center, point)
+        center_score = 1.0 - center_distance / 30
+        center_score *= -3
+        return center_score + distance_score + space_score
 
     def ship_initialization(self):
         for ship in self.field_analyser.state.MyShips.values():

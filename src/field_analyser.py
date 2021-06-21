@@ -3,16 +3,16 @@ from dataclasses import dataclass, field
 from typing import Dict, DefaultDict, Optional, List
 
 from ship import Ship, ShipData
-from utils.distance import distance_c_len
+from utils.distance import distance_ship2ship
 
 
 @dataclass
 class FieldState:
     MyShips: Dict[int, Ship] = field(default_factory=dict)
     OppShips: Dict[int, Ship] = field(default_factory=dict)
-    DistanceHp: DefaultDict[int, DefaultDict[int, List[int]]] = \
+    OppDistanceHp: DefaultDict[int, DefaultDict[int, List[int]]] = \
         field(default_factory=lambda: defaultdict(lambda: defaultdict(list)))
-    OppIsDamage: DefaultDict[int, int] = field(default_factory=lambda: defaultdict(int))
+    MaxOppDamageImpact: DefaultDict[int, int] = field(default_factory=lambda: defaultdict(int))
     GlobalTarget: Optional[int] = None
 
 
@@ -22,16 +22,16 @@ class FieldAnalyser:
         self.prev_state: Optional[FieldState] = None
 
     def update_ships(self, my: List[ShipData], opponents: List[ShipData]):
-        self.state.OppIsDamage.clear()
-        self.state.DistanceHp.clear()
+        self.state.MaxOppDamageImpact.clear()
+        self.state.OppDistanceHp.clear()
 
-        for Id in list(self.state.MyShips.keys()):
-            if sum([Id == ship.Id for ship in my]) == 0:
-                self.state.MyShips.pop(Id)
+        for ship_id in list(self.state.MyShips.keys()):
+            if not any((ship_id == ship.Id for ship in my)):
+                self.state.MyShips.pop(ship_id)
 
-        for Id in list(self.state.OppShips.keys()):
-            if sum([Id == ship.Id for ship in opponents]) == 0:
-                self.state.OppShips.pop(Id)
+        for ship_id in list(self.state.OppShips.keys()):
+            if not any((ship_id == ship.Id for ship in opponents)):
+                self.state.OppShips.pop(ship_id)
 
         for ship in my:
             if ship.Id not in self.state.MyShips:
@@ -43,14 +43,14 @@ class FieldAnalyser:
                 self.state.OppShips[ship.Id] = Ship()
             self.state.OppShips[ship.Id].update_data(ship)
 
-        for my_ship in my:
-            for opp_ship in opponents:
+        for my_ship in self.state.MyShips.values():
+            for opp_ship in self.state.OppShips.values():
                 # Дистанция и хп
-                distance = distance_c_len(my_ship.Position + my_ship.Velocity, opp_ship.Position + opp_ship.Velocity)
-                self.state.DistanceHp[my_ship.Id][opp_ship.Id] = [distance, opp_ship.Health]
+                distance = distance_ship2ship(my_ship.ExpectedPosition, opp_ship.ExpectedPosition)
+                self.state.OppDistanceHp[my_ship.Data.Id][opp_ship.Data.Id] = [distance, opp_ship.Data.Health]
                 # Предполагаемый урон
-                if my_ship.Guns and distance <= my_ship.Guns[0].Radius:
-                    self.state.OppIsDamage[opp_ship.Id] += my_ship.Guns[0].Damage
+                if my_ship.Data.Guns and distance <= my_ship.Data.Guns[0].Radius:
+                    self.state.MaxOppDamageImpact[opp_ship.Data.Id] += my_ship.Data.Guns[0].Damage
 
     def create_new_state(self):
         self.prev_state = self.state

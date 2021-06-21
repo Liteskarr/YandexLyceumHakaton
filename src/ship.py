@@ -82,6 +82,16 @@ class Ship(JSONCapability):
         self.Way = None
         self.MoveTarget = target
 
+    def set_attack(self, target: Vector, gun: str, enemy_id: int):
+        self.AttackTarget = target
+        self.UsedGun = gun
+        self.OppIdTarget = enemy_id
+
+    def drop_attack(self):
+        self.AttackTarget = None
+        self.UsedGun = None
+        self.OppIdTarget = None
+
     def update(self) -> Iterator[UserCommand]:
         if self.Way is not None:
             try:
@@ -107,3 +117,4 @@ class Ship(JSONCapability):
         self.ExpectedPosition += self.ExpectedVelocity
         if self.AttackTarget is not None and self.UsedGun is not None and not self.FriendlyFire:
             yield self.make_attack(self.AttackTarget, self.UsedGun)
+        self.drop_attack()
