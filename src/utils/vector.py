@@ -1,3 +1,4 @@
+from typing import Union
 from dataclasses import dataclass
 
 from json_capability import JSONCapability
@@ -5,9 +6,9 @@ from json_capability import JSONCapability
 
 @dataclass
 class Vector(JSONCapability):
-    X: int
-    Y: int
-    Z: int
+    X: Union[int, float]
+    Y: Union[int, float]
+    Z: Union[int, float]
 
     @classmethod
     def from_json(cls, data):
@@ -58,6 +59,16 @@ class Vector(JSONCapability):
 
     def __hash__(self):
         return hash((self.X, self.Y, self.Z))
+
+    def __pow__(self, power: "Vector", modulo=None):
+        return Vector(
+            self.Y * power.Z - power.Y * self.Z,
+            self.Z * power.X - power.Z * self.X,
+            self.X * power.Y - power.X * self.Y
+        )
+
+    def len(self):
+        return (self.X ** 2 + self.Y ** 2 + self.Z ** 2) ** 0.5
 
     def c_len(self):
         return max(abs(self.X), abs(self.Y), abs(self.Z))

@@ -43,5 +43,11 @@ def get_direction_vector(point: Vector, target: Vector) -> Vector:
     return list(takewhile(lambda x: (x - point).c_len() <= 1, server_bresenham(point, target)))[-1] - point
 
 
+def distance_point_line(point: Vector, start: Vector, finish: Vector):
+    line, m = finish - start, start - point
+    return (m ** line).len() / line.len()
+
+
 if __name__ == '__main__':
-    print(get_fire_offset(Vector(19, 11, 11), Vector(15, 14, 14)))
+    # print(get_fire_offset(Vector(19, 11, 11), Vector(15, 14, 14)))
+    print(distance_point_line(Vector(0, -1, 0), Vector((3 ** 0.5) / 2, 0.5, 0), Vector(0, 0.5, (3 ** 0.5) / 2)))
