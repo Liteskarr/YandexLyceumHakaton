@@ -47,6 +47,7 @@ class Attack:
                 ship.Adjustment[edit] -= self.delta_adjustment
 
     def update(self):
+        g_id = self.field_analyser.state.GlobalTarget
         self.focus = list()
         # cor = Vector(0, 0, 0)  TODO: Кинуть в цикл
         for Id, opp in self.field_analyser.state.OppShips.items():
@@ -56,8 +57,13 @@ class Attack:
             self.focus = sorted(list(self.field_analyser.state.OppIsDamage.items()), key=lambda x: x[1])[0]
         #
         for Id, ship in self.field_analyser.state.MyShips.items():
-            # TODO: Проверить на попадание
             self.check_hit(Id)
+            if g_id and self.field_analyser.state.DistanceHp[ship.Data.Id][g_id][0] <= ship.Data.Guns[0].Radius:
+                ship.AttackTarget = self.field_analyser.state.OppShips[g_id].Data.Position  # + cor
+                ship.UsedGun = ship.Data.Guns[0].Name
+                ship.OppIdTarget = g_id
+                return
+            # TODO: Проверить на попадание
             if self.focus:
                 opp = self.field_analyser.state.OppShips[self.focus[0]]
                 dist, hp = self.field_analyser.state.DistanceHp[Id][opp.Data.Id]

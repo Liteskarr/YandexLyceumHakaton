@@ -44,9 +44,7 @@ class FieldAnalyser:
             self.state.OppShips[ship.Id].update_data(ship)
 
         for my_ship in my:
-            self.state.MyShips[my_ship.Id].Data = my_ship
             for opp_ship in opponents:
-                self.state.OppShips[opp_ship.Id].Data = opp_ship
                 # Дистанция и хп
                 distance = distance_c_len(my_ship.Position + my_ship.Velocity, opp_ship.Position) - 1
                 self.state.DistanceHp[my_ship.Id][opp_ship.Id] = [distance, opp_ship.Health]
