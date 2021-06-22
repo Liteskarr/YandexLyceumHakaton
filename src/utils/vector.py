@@ -1,3 +1,4 @@
+from math import ceil
 from typing import Union
 from dataclasses import dataclass
 
@@ -66,6 +67,9 @@ class Vector(JSONCapability):
             self.Z * power.X - power.Z * self.X,
             self.X * power.Y - power.X * self.Y
         )
+
+    def ceil(self):
+        return Vector(ceil(self.X), ceil(self.Y), ceil(self.Z))
 
     def len(self):
         return (self.X ** 2 + self.Y ** 2 + self.Z ** 2) ** 0.5

@@ -1,6 +1,7 @@
+from math import ceil
 from collections import namedtuple
 from enum import Enum
-from itertools import product
+from itertools import product, chain
 from typing import Dict, Optional, List
 
 from field_analyser import FieldAnalyser
@@ -24,7 +25,8 @@ def could_stand_on_point(p: Vector):
     return 0 <= p.X <= 28 and 0 <= p.Y <= 28 and 0 <= p.Z <= 28
 
 
-CONTROL_POINTS = list(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)))
+CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)),
+                            map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
 
 
 class BaseMovingTactics(IMovingTactics):
@@ -45,7 +47,7 @@ class BaseMovingTactics(IMovingTactics):
         own_average_distance /= len(self.field_analyser.state.MyShips) * 29
         own_distance_score = activate(0.1, own_average_distance)
         # Подсчет количества HP.
-        hp_score = min(1.0, ship.Data.Health / 128)
+        hp_score = activate(0.0, ship.Data.Health / 128)
         # Дальность от своих союзников.
         enemy_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                       for ship in self.field_analyser.state.OppShips.values()))
@@ -84,7 +86,7 @@ class BaseMovingTactics(IMovingTactics):
             if ship.Data.Id not in self.states:
                 self.states[ship.Data.Id] = MovingStates.FREE
             if ship.Data.Id not in self.control_points:
-                self.control_points[ship.Data.Id] = list(map(lambda x: x * (ship.Data.MaxRangeAttack - 1),
+                self.control_points[ship.Data.Id] = list(map(lambda x: (x * (ship.Data.MaxRangeAttack - 1)).ceil(),
                                                              CONTROL_POINTS))
 
     def update_enemies_center(self):
@@ -110,7 +112,6 @@ class BaseMovingTactics(IMovingTactics):
             global_enemy = self.field_analyser.state.OppShips[self.global_target]
             points = map(lambda x: (x + global_enemy.Data.Position, x), self.control_points[ship_id])
             points = filter(lambda x: could_stand_on_point(x[0]), points)
-            points = filter(lambda p: p not in self.used, points)
             points = list(points)
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
