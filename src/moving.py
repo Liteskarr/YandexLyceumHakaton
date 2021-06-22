@@ -20,9 +20,6 @@ MOVING_PATTERNS: DefaultDict[int, DefaultDict[int, List[int]]] = defaultdict(lam
 
 def precalculate_moving_patterns(engine_acceleration: int):
     global MOVING_PATTERNS
-    if engine_acceleration != 1:
-        # TODO: Придумай идею для произвольного ускорения.
-        raise NotImplementedError()
     MOVING_PATTERNS = defaultdict(lambda: defaultdict(list))
     MOVING_PATTERNS[engine_acceleration][1] = [1, -1]
     for size in range(2, AXIS_SIZE + 1):

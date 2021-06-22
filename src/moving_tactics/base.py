@@ -22,10 +22,10 @@ class MovingStates(Enum):
 
 
 def could_stand_on_point(p: Vector):
-    return 1 <= p.X <= 28 and 1 <= p.Y <= 28 and 1 <= p.Z <= 28
+    return 2 <= p.X <= 27 and 2 <= p.Y <= 27 and 2 <= p.Z <= 27
 
 
-CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
+CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3))))
 
 
 class BaseMovingTactics(IMovingTactics):
@@ -34,7 +34,6 @@ class BaseMovingTactics(IMovingTactics):
         self.enemies_center: Vector = Vector(0, 0, 0)
         self.global_target: Optional[int] = None
         self.field_analyser = field_analyser
-        self.states: Dict[int, MovingStates] = {}
         self.control_points: Dict[int, List[Vector]] = {}
         self.targets: Dict[int, Vector] = {}
 
@@ -57,7 +56,7 @@ class BaseMovingTactics(IMovingTactics):
         center_score = activate(1.0, center_distance / 30) ** (1 / 3)
         center_score *= -5
         #
-        target_changing_score = 0 if self.global_target in [ship_id, None] else -1.7
+        target_changing_score = 0 if self.global_target in [ship_id, None] else -2.5
         return own_distance_score + hp_score + enemy_distance_score + center_score + target_changing_score
 
     def point_score(self, point: Vector, dist: Vector, ship_id: int, ship: Ship):
@@ -77,8 +76,6 @@ class BaseMovingTactics(IMovingTactics):
 
     def ship_initialization(self):
         for ship in self.field_analyser.state.MyShips.values():
-            if ship.Data.Id not in self.states:
-                self.states[ship.Data.Id] = MovingStates.FREE
             if ship.Data.Id not in self.control_points:
                 self.control_points[ship.Data.Id] = list(map(lambda x: (x * (ship.Data.MaxRangeAttack - 1)).ceil(),
                                                              CONTROL_POINTS))
@@ -106,7 +103,7 @@ class BaseMovingTactics(IMovingTactics):
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
             else:
-                point = (global_enemy.Data.Position, )
+                point = (global_enemy.ExpectedPosition, )
             self.targets[ship_id] = point[0]
             self.move(ship, point[0])
 
