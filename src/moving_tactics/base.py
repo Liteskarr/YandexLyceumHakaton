@@ -45,7 +45,7 @@ class BaseMovingTactics(IMovingTactics):
         own_average_distance /= len(self.field_analyser.state.MyShips) * 29
         own_distance_score = activate(0.1, own_average_distance)
         # Подсчет количества HP.
-        hp_score = min(1.0, ship.Data.Health / 128)
+        hp_score = activate(0.0, ship.Data.Health / 128)
         # Дальность от своих союзников.
         enemy_average_distance = sum((distance_ship2ship(ship.Data.Position, enemy_position)
                                       for ship in self.field_analyser.state.OppShips.values()))
@@ -110,7 +110,6 @@ class BaseMovingTactics(IMovingTactics):
             global_enemy = self.field_analyser.state.OppShips[self.global_target]
             points = map(lambda x: (x + global_enemy.Data.Position, x), self.control_points[ship_id])
             points = filter(lambda x: could_stand_on_point(x[0]), points)
-            points = filter(lambda p: p not in self.used, points)
             points = list(points)
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
