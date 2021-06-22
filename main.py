@@ -10,10 +10,14 @@ from field_analyser import FieldAnalyser
 from moving_tactics.base import BaseMovingTactics
 
 
-def make_draft(data: dict) -> DraftChoice:
-    # TODO: parse input data
-    # TODO: Make draft
-    return DraftChoice()
+StarStorms = [{
+    "Position": None,
+    "CompleteShipId": "starstorm"
+} for _ in range(5)]
+
+
+def make_draft(data: dict) -> dict:
+    return {'Ships': StarStorms}
 
 
 def make_turn(data: dict, controller: Controller) -> BattleOutput:
@@ -21,7 +25,9 @@ def make_turn(data: dict, controller: Controller) -> BattleOutput:
     battle_output = BattleOutput()
     battle_output.Message = f"No output!"
     try:
-        battle_output.UserCommands = list(controller.update(battle_state.My, battle_state.Opponent))
+        out = list(controller.update(battle_state.My, battle_state.Opponent))
+        if out:
+            battle_output.UserCommands = out
     except Exception as e:
         battle_output.Message = '\n'.join(traceback.format_tb(e.__traceback__))
         battle_output.Message += f'\n{e}'
