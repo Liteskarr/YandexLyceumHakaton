@@ -98,10 +98,7 @@ class BaseMovingTactics(IMovingTactics):
                                  key=lambda x: self.enemy_score(x.Data.Id, x)).Data.Id
 
     def move(self, ship: Ship, target: Vector):
-        if ship.Data.Velocity == Vector(0, 0, 0) and Vector.between(Vector(7, 7, 7), Vector(21, 21, 21), target):
-            ship.set_way(moving(ship.Data.Position, target, ship.Data.MaxAccelerate))
-        else:
-            ship.set_move_target(target)
+        ship.set_move_target(target)
 
     def give_an_order(self, ship_id: int, ship: Ship):
         if ship.ExpectedVelocity != ship.Data.Velocity:
@@ -112,12 +109,11 @@ class BaseMovingTactics(IMovingTactics):
             global_enemy = self.field_analyser.state.OppShips[self.global_target]
             points = map(lambda x: (x + global_enemy.Data.Position, x), self.control_points[ship_id])
             points = filter(lambda x: could_stand_on_point(x[0]), points)
-            points = filter(lambda x: x[0] not in self.targets.values(), points)
             points = list(points)
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
             else:
-                point = (ship.Data.Position, None)
+                point = (ship.Data.Position, )
             self.targets[ship_id] = point[0]
             self.move(ship, point[0])
 
