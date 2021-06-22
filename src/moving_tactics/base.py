@@ -21,7 +21,7 @@ class MovingStates(Enum):
 
 
 def could_stand_on_point(p: Vector):
-    return 1 <= p.X <= 28 and 1 <= p.Y <= 28 and 1 <= p.Z <= 28
+    return 0 <= p.X <= 28 and 0 <= p.Y <= 28 and 0 <= p.Z <= 28
 
 
 CONTROL_POINTS = list(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)))
@@ -109,6 +109,7 @@ class BaseMovingTactics(IMovingTactics):
             global_enemy = self.field_analyser.state.OppShips[self.global_target]
             points = map(lambda x: (x + global_enemy.Data.Position, x), self.control_points[ship_id])
             points = filter(lambda x: could_stand_on_point(x[0]), points)
+            points = filter(lambda p: p not in self.targets.values() or p == ship.ExpectedPosition, points)
             points = list(points)
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
