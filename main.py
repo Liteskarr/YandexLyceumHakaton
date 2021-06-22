@@ -12,11 +12,14 @@ from moving_tactics.base import BaseMovingTactics
 
 StarStorms = [{
     "Position": None,
-    "CompleteShipId": "starstorm"
+    "CompleteShipId": None,
+    "Equipment": ['big_energy', 'big_engine', 'giant_blaster', 'big_health', 'big_health', 'big_health']
+    # 72
 } for _ in range(5)]
 
 
 def make_draft(data: dict) -> dict:
+    money = data['Money']
     return {'Ships': StarStorms}
 
 
