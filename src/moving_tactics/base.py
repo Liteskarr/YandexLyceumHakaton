@@ -1,6 +1,7 @@
+from math import ceil
 from collections import namedtuple
 from enum import Enum
-from itertools import product
+from itertools import product, chain
 from typing import Dict, Optional, List
 
 from field_analyser import FieldAnalyser
@@ -24,7 +25,8 @@ def could_stand_on_point(p: Vector):
     return 0 <= p.X <= 28 and 0 <= p.Y <= 28 and 0 <= p.Z <= 28
 
 
-CONTROL_POINTS = list(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)))
+CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)),
+                            map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
 
 
 class BaseMovingTactics(IMovingTactics):
@@ -84,7 +86,7 @@ class BaseMovingTactics(IMovingTactics):
             if ship.Data.Id not in self.states:
                 self.states[ship.Data.Id] = MovingStates.FREE
             if ship.Data.Id not in self.control_points:
-                self.control_points[ship.Data.Id] = list(map(lambda x: x * (ship.Data.MaxRangeAttack - 1),
+                self.control_points[ship.Data.Id] = list(map(lambda x: (x * (ship.Data.MaxRangeAttack - 1)).__ceil__(),
                                                              CONTROL_POINTS))
 
     def update_enemies_center(self):
