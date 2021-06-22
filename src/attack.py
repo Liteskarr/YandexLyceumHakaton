@@ -26,13 +26,14 @@ class Attack:
         if focus:
             target = self.field_analyser.state.OppShips[focus[0][0]]
         for ship_id, ship in self.field_analyser.state.MyShips.items():
-            if focus and distance_ship2ship(ship.ExpectedPosition, target.ExpectedPosition):
-                _, offset = get_fire_offset(ship.ExpectedPosition, target.ExpectedPosition)
-                correction = NEG_SHIP_CORR[offset]
+            cor_my, cor_opp = get_fire_offset(ship.ExpectedPosition, target.ExpectedPosition)
+            if focus and distance_ship2ship(ship.ExpectedPosition + cor_my, target.ExpectedPosition + cor_opp):
+                correction = NEG_SHIP_CORR[cor_opp]
                 ship.set_attack(target.ExpectedPosition + correction, self.get_best_gun(ship), target.Data.Id)
             else:
                 enemy = self.field_analyser.state.OppShips[self.get_best_enemy(ship)]
-                if distance_ship2ship(enemy.ExpectedPosition, ship.ExpectedPosition) <= ship.Data.MaxRangeAttack:
-                    _, offset = get_fire_offset(ship.ExpectedPosition, target.ExpectedPosition)
-                    correction = NEG_SHIP_CORR[offset]
+                cor_my, cor_opp = get_fire_offset(ship.ExpectedPosition, enemy.ExpectedPosition)
+                if distance_ship2ship(enemy.ExpectedPosition + cor_opp, ship.ExpectedPosition + cor_my) <= \
+                        ship.Data.MaxRangeAttack:
+                    correction = NEG_SHIP_CORR[cor_opp]
                     ship.set_attack(enemy.ExpectedPosition + correction, self.get_best_gun(ship), enemy.Data.Id)

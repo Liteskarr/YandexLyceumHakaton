@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Dict, DefaultDict, Optional, List
 
 from ship import Ship, ShipData
-from utils.distance import distance_ship2ship
+from utils.distance import distance_ship2ship, get_fire_offset
 
 
 @dataclass
@@ -46,7 +46,8 @@ class FieldAnalyser:
         for my_ship in self.state.MyShips.values():
             for opp_ship in self.state.OppShips.values():
                 # Дистанция и хп
-                distance = distance_ship2ship(my_ship.ExpectedPosition, opp_ship.ExpectedPosition) - 1
+                cor_my, cor_opp = get_fire_offset(my_ship.ExpectedPosition, opp_ship.ExpectedPosition)
+                distance = distance_ship2ship(my_ship.ExpectedPosition + cor_my, opp_ship.ExpectedPosition + cor_opp)
                 self.state.OppDistanceHp[my_ship.Data.Id][opp_ship.Data.Id] = [distance, opp_ship.Data.Health]
                 # Предполагаемый урон
                 if my_ship.Data.Guns and distance <= my_ship.Data.MaxRangeAttack:
