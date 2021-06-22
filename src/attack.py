@@ -30,7 +30,7 @@ class Attack:
         for Id, ship in self.field_analyser.state.MyShips.items():
             if Id != from_ship.Data.Id:
                 for cor in SHIP_CORR:
-                    if point_in_bresenham(ship.Data.Position + cor, start=from_point, finish=target):
+                    if point_in_bresenham(ship.ExpectedPosition + cor, start=from_point, finish=target):
                         return True
         return False
 
