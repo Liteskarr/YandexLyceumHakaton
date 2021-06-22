@@ -25,8 +25,7 @@ def could_stand_on_point(p: Vector):
     return 0 <= p.X <= 28 and 0 <= p.Y <= 28 and 0 <= p.Z <= 28
 
 
-CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1, 0, 1], repeat=3)),
-                            map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
+CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
 
 
 class BaseMovingTactics(IMovingTactics):
@@ -56,9 +55,9 @@ class BaseMovingTactics(IMovingTactics):
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, enemy_position)
         center_score = activate(1.0, center_distance / 30) ** (1 / 3)
-        center_score *= -4
+        center_score *= -5
         #
-        target_changing_score = 0 if self.global_target in [ship_id, None] else -1.3
+        target_changing_score = 0 if self.global_target in [ship_id, None] else -1.7
         return own_distance_score + hp_score + enemy_distance_score + center_score + target_changing_score
 
     def point_score(self, point: Vector, dist: Vector, ship_id: int, ship: Ship):
@@ -67,19 +66,14 @@ class BaseMovingTactics(IMovingTactics):
         # Близость к центру масс противников.
         center_distance = distance_point2ship(self.enemies_center, point)
         center_score = activate(1.0, center_distance / 30) ** (1 / 3)
-        center_score *= -3
+        center_score *= -5
         #
         count = 0
         for enemy in self.field_analyser.state.OppShips.values():
             if distance_point2ship(point, enemy.ExpectedPosition) <= ship.Data.MaxRangeAttack:
                 count += 1
-        count_score = 3 * activate(0.2, count / 5) ** (1 / 2)
+        count_score = -4 * activate(1.0, count / 10) ** (1 / 2)
         return count_score + center_score + distance_score
-
-    def must_retreat(self, ship: Ship) -> bool:
-        if self.field_analyser.prev_state.MyShips[ship.Data.Id].Data.Health / ship.Data.Health < 0.8:
-            return True
-        return False
 
     def ship_initialization(self):
         for ship in self.field_analyser.state.MyShips.values():
@@ -103,22 +97,17 @@ class BaseMovingTactics(IMovingTactics):
         ship.set_move_target(target)
 
     def give_an_order(self, ship_id: int, ship: Ship):
-        self.used = set()
-        if ship.ExpectedVelocity != ship.Data.Velocity:
-            ship.set_way(change_velocity(ship.Data.Position, Vector(0, 0, 0)))
-            return
-
         if self.global_target is not None:
             global_enemy = self.field_analyser.state.OppShips[self.global_target]
-            points = map(lambda x: (x + global_enemy.Data.Position, x), self.control_points[ship_id])
+            points = map(lambda x: (x + global_enemy.ExpectedPosition, x), self.control_points[ship_id])
             points = filter(lambda x: could_stand_on_point(x[0]), points)
+            points = filter(lambda p: p[0] not in self.targets.values(), points)
             points = list(points)
             if points:
                 point = max(points, key=lambda x: self.point_score(x[0], x[1], ship_id, ship))
             else:
-                point = (ship.Data.Position, )
+                point = (global_enemy.Data.Position, )
             self.targets[ship_id] = point[0]
-            self.used.add(point[0])
             self.move(ship, point[0])
 
     def update(self):
