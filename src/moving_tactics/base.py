@@ -22,7 +22,7 @@ class MovingStates(Enum):
 
 
 def could_stand_on_point(p: Vector):
-    return 0 <= p.X <= 28 and 0 <= p.Y <= 28 and 0 <= p.Z <= 28
+    return 1 <= p.X <= 28 and 1 <= p.Y <= 28 and 1 <= p.Z <= 28
 
 
 CONTROL_POINTS = list(chain(map(lambda x: Vector(*x), product([-1.2, 0, 1.2], repeat=3))))
