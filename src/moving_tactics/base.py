@@ -86,7 +86,7 @@ class BaseMovingTactics(IMovingTactics):
             if ship.Data.Id not in self.states:
                 self.states[ship.Data.Id] = MovingStates.FREE
             if ship.Data.Id not in self.control_points:
-                self.control_points[ship.Data.Id] = list(map(lambda x: (x * (ship.Data.MaxRangeAttack - 1)).__ceil__(),
+                self.control_points[ship.Data.Id] = list(map(lambda x: (x * (ship.Data.MaxRangeAttack - 1)).ceil(),
                                                              CONTROL_POINTS))
 
     def update_enemies_center(self):
