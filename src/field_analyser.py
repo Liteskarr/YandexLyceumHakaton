@@ -49,7 +49,7 @@ class FieldAnalyser:
                 distance = distance_ship2ship(my_ship.ExpectedPosition, opp_ship.ExpectedPosition) - 1
                 self.state.OppDistanceHp[my_ship.Data.Id][opp_ship.Data.Id] = [distance, opp_ship.Data.Health]
                 # Предполагаемый урон
-                if my_ship.Data.Guns and distance <= my_ship.Data.Guns[0].Radius:
+                if my_ship.Data.Guns and distance <= my_ship.Data.MaxRangeAttack:
                     self.state.MaxOppDamageImpact[opp_ship.Data.Id] += my_ship.Data.Guns[0].Damage
 
     def create_new_state(self):
