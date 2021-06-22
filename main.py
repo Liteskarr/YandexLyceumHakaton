@@ -10,23 +10,29 @@ from field_analyser import FieldAnalyser
 from moving_tactics.base import BaseMovingTactics
 
 
+# 80
+equip = ''
+money = ''
 StarStorms = [{
     "Position": None,
     "CompleteShipId": None,
     "Equipment": ['big_energy', 'big_engine', 'giant_blaster', 'big_health', 'big_health', 'big_health']
-    # 72
+    # 10 + 20 + 12 + 10 + 10 + 10
 } for _ in range(5)]
 
 
 def make_draft(data: dict) -> dict:
+    global equip, money
     money = data['Money']
+    equip = data['Equipment']
     return {'Ships': StarStorms}
 
 
 def make_turn(data: dict, controller: Controller) -> BattleOutput:
+    global equip, money
     battle_state = BattleState.from_json(data)
     battle_output = BattleOutput()
-    battle_output.Message = f"No output!"
+    battle_output.Message = str(money) + str(equip)
     try:
         out = list(controller.update(battle_state.My, battle_state.Opponent))
         if out:
