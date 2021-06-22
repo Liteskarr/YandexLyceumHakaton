@@ -53,6 +53,6 @@ class Attack:
                 cor_my, cor_opp = get_fire_offset(ship.ExpectedPosition, enemy.ExpectedPosition)
                 correction = NEG_SHIP_CORR[cor_opp]
                 from_point, target_point = ship.ExpectedPosition + cor_my, enemy.ExpectedPosition + correction
-                if distance_ship2ship(enemy.ExpectedPosition + cor_opp, ship.ExpectedPosition + cor_my) <= \
+                if distance_ship2ship(ship.ExpectedPosition + cor_my, enemy.ExpectedPosition + cor_opp) <= \
                         ship.Data.MaxRangeAttack and not self.check_friendly_fire(ship, from_point, target_point):
                     ship.set_attack(target_point, self.get_best_gun(ship), enemy.Data.Id)
